@@ -1,0 +1,43 @@
+{
+  "name": "ptaa-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal Tracking AI Assistant — desktop tracking agent",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "tsc -w & electron .",
+    "build": "tsc",
+    "start": "electron .",
+    "package": "electron-builder",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "active-win": "8.2.1",
+    "axios": "^1.6.8",
+    "better-sqlite3": "^11.0.0",
+    "electron-store": "^8.2.0",
+    "node-machine-id": "^1.1.12"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.9",
+    "@types/node": "^20.11.30",
+    "electron": "^29.1.5",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.4.3"
+  },
+  "build": {
+    "appId": "dev.ptaa.agent",
+    "productName": "Pulse Agent",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "mac": { "target": "dmg", "category": "public.app-category.productivity" },
+    "win": { "target": "nsis" },
+    "linux": { "target": "AppImage", "category": "Utility" }
+  }
+}

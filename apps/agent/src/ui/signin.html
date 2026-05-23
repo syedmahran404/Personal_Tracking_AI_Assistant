@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+    <title>Sign in to Pulse</title>
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --panel: #14141b;
+        --border: #25252e;
+        --muted: #8d8d99;
+        --fg: #f4f4f7;
+        --primary: #8b5cf6;
+        --danger: #ef4444;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0; padding: 0;
+        background: var(--bg); color: var(--fg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        height: 100%;
+      }
+      .wrap { padding: 28px 24px; height: 100%; display: flex; flex-direction: column; }
+      h1 { margin: 0 0 6px; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+      p { margin: 0 0 22px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+      label { display: block; margin: 12px 0 6px; font-size: 12px; color: var(--muted); }
+      input {
+        width: 100%; padding: 10px 12px; border-radius: 8px;
+        border: 1px solid var(--border); background: var(--panel); color: var(--fg);
+        font-size: 13px; outline: none; transition: border-color 0.15s;
+      }
+      input:focus { border-color: var(--primary); }
+      button {
+        width: 100%; padding: 10px 14px; border-radius: 8px; border: 0;
+        background: var(--primary); color: #fff; font-weight: 600; font-size: 13px;
+        cursor: pointer; margin-top: 18px; transition: opacity 0.15s;
+      }
+      button:disabled { opacity: 0.6; cursor: progress; }
+      .err {
+        margin-top: 14px; padding: 10px 12px; border-radius: 8px;
+        background: rgba(239, 68, 68, 0.12); color: #fca5a5; font-size: 12px;
+        display: none;
+      }
+      .err.show { display: block; }
+      .meta {
+        margin-top: auto; padding-top: 20px;
+        font-size: 11px; color: var(--muted);
+        border-top: 1px solid var(--border);
+      }
+      .api { display: flex; gap: 8px; align-items: center; }
+      .api input { flex: 1; font-size: 11px; padding: 6px 8px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Sign in to Pulse</h1>
+      <p>The agent will track your active windows in the background and sync to your account.</p>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" placeholder="you@company.com" />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+
+      <button id="submit">Sign in</button>
+
+      <div id="err" class="err"></div>
+
+      <div class="meta">
+        <label style="margin: 0 0 6px;">API URL</label>
+        <div class="api">
+          <input id="apiUrl" />
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      (async () => {
+        const cfg = await window.ptaa.getConfig();
+        $("apiUrl").value = cfg.apiUrl;
+      })();
+
+      $("apiUrl").addEventListener("change", (e) => window.ptaa.setApiUrl(e.target.value));
+
+      $("submit").addEventListener("click", async () => {
+        const email = $("email").value.trim();
+        const password = $("password").value;
+        const err = $("err");
+        err.classList.remove("show");
+        if (!email || !password) {
+          err.textContent = "Email and password are required.";
+          err.classList.add("show");
+          return;
+        }
+        const btn = $("submit");
+        btn.disabled = true;
+        btn.textContent = "Signing in…";
+        const res = await window.ptaa.login(email, password);
+        btn.disabled = false;
+        btn.textContent = "Sign in";
+        if (!res.ok) {
+          err.textContent = res.error || "Sign-in failed.";
+          err.classList.add("show");
+        }
+      });
+
+      $("password").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") $("submit").click();
+      });
+    </script>
+  </body>
+</html>
